@@ -89,6 +89,28 @@ public class ConsoleEmulator
                 }
                 break;
             }
+            case "echo":
+            {
+                if (args.length == 1)
+                {
+                    String arg = args[0];
+                    if (arg.length() >= 2 &&
+                        (arg.startsWith("\"") && arg.endsWith("\"") ||
+                        arg.startsWith("\'") && arg.endsWith("\'")))
+                    {
+                        result = arg.substring(1, arg.length() - 1);
+                    }
+                    else
+                    {
+                        result = "Usage: echo \"<string>\"";
+                    }
+                }
+                else
+                {
+                    result = "Usage: echo \"<string>\"";
+                }
+                break;
+            }
             case "clear":
             {
                 if (args.length == 0)

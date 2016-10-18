@@ -26,6 +26,10 @@
             android:background="#050505"
             android:scrollbars="vertical">
 
+        <!--
+        TODO: Change this to use something other than fontFamily to be
+        compatible with android api < 16
+         -->
         <TextView
                 android:id="@+id/CONSOLE_BUFFER"
                 android:layout_width="fill_parent"
@@ -34,9 +38,12 @@
                 android:fontFamily="monospace"
                 android:textColor="#AAAAAA"/>
 
-
     </ScrollView>
 
+    <!--
+    TODO: Change this to use something other than fontFamily to be
+    compatible with android api < 16
+     -->
     <EditText
             android:id="@+id/CONSOLE_INPUT"
             android:layout_width="fill_parent"

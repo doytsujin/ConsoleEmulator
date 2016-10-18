@@ -1,7 +1,6 @@
 package com.rtoth.console;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -12,12 +11,21 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+/**
+ * Main activity for the Console Emulator.
+ *
+ * @author rtoth
+ */
 public class MainActivity extends AppCompatActivity
 {
     private final ConsoleEmulator console;
 
+    /**
+     * Create a new {@link MainActivity}.
+     */
     public MainActivity()
     {
+        // TODO: Make these parameters configurable in settings
         console = new ConsoleEmulator("rtoth", 50);
     }
 
@@ -35,15 +43,21 @@ public class MainActivity extends AppCompatActivity
         buffer.setText(console.getContent());
 
         final EditText input = (EditText) findViewById(R.id.CONSOLE_INPUT);
+        // Listen for input from the user
         input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 String command = v.getText().toString();
                 if (!command.trim().isEmpty())
                 {
+                    // Execute the command
                     console.execute(command);
+                    // Update the buffer
                     buffer.setText(console.getContent());
+                    // Clear the input field
                     input.getText().clear();
+                    // Scroll the buffer to the bottom and focus back on the
+                    // input for the user
                     scrollView.post(new Runnable()
                     {
                         @Override

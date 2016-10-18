@@ -1,21 +1,32 @@
 package com.rtoth.console;
 
+import com.google.common.collect.EvictingQueue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
 import android.os.Environment;
+import android.support.annotation.NonNull;
 
 /**
  * Created by rtoth on 10/17/2016.
  */
 public class ConsoleEmulator
 {
+    private static final String PROMPT_FORMAT_STR = "%s@android:%s$ ";
+
+    private final String user;
+
+    private final EvictingQueue<String> buffer;
+
     private File currentDirectory;
 
-    public ConsoleEmulator()
+    public ConsoleEmulator(@NonNull String user, int bufferSize)
     {
-        currentDirectory = Environment.getRootDirectory();
+        this.user = user;
+        this.buffer = EvictingQueue.create(bufferSize);
+        this.currentDirectory = Environment.getRootDirectory();
         try
         {
             FileUtilities.assertDirectoryPermissions(currentDirectory);
@@ -26,8 +37,11 @@ public class ConsoleEmulator
         }
     }
 
-    public String execute(String commandStr)
+    public void execute(String commandStr)
     {
+        // First append the current prompt since that will want to be part of the history
+        buffer.add(getPrompt());
+
         String[] commandPlusArgs = commandStr.split("\\s+");
         String command = commandPlusArgs[0];
         String[] args = Arrays.copyOfRange(commandPlusArgs, 1, commandPlusArgs.length);
@@ -39,11 +53,11 @@ public class ConsoleEmulator
             {
                 if (args.length == 1)
                 {
-                    result = ListDirectoryContents.execute(getAbsolutePath(args[0]));
+                    result = listDirectory(args[0]);
                 }
                 else if (args.length == 0)
                 {
-                    result = ListDirectoryContents.execute(currentDirectory.getAbsolutePath());
+                    result = listDirectory(currentDirectory.getAbsolutePath());
                 }
                 else
                 {
@@ -93,14 +107,67 @@ public class ConsoleEmulator
                 break;
             }
         }
-        return result;
+        if (result != null && !result.trim().isEmpty())
+        {
+            buffer.add(result);
+        }
+    }
+
+    public String getContent()
+    {
+        StringBuilder builder = new StringBuilder();
+        for (String output : buffer)
+        {
+            builder.append(output);
+            builder.append("\n");
+        }
+        builder.append(getPrompt());
+
+        return builder.toString();
+    }
+
+    private String getPrompt()
+    {
+        return String.format(PROMPT_FORMAT_STR, user, currentDirectory.getAbsolutePath());
+    }
+
+    private String listDirectory(String location)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        try
+        {
+            File file = getCanonicalFile(location);
+            FileUtilities.assertBasicFilePermissions(file);
+            if (file.isDirectory())
+            {
+                FileUtilities.assertDirectoryPermissions(file);
+                for (File subdirectory : file.listFiles())
+                {
+                    builder.append(FileUtilities.getDetails(subdirectory));
+                    builder.append("\n");
+                }
+            }
+            else
+            {
+                builder.append(FileUtilities.getDetails(file));
+            }
+        }
+        catch (IOException ioe)
+        {
+            builder.append("Error: ");
+            builder.append(ioe.getMessage());
+            builder.append("\n");
+        }
+
+        return builder.toString();
     }
 
     private String changeDirectory(String location)
     {
         try
         {
-            File directory = new File(getAbsolutePath(location));
+            File directory = getCanonicalFile(location);
             FileUtilities.assertDirectoryPermissions(directory);
             currentDirectory = directory;
             return "";
@@ -111,16 +178,17 @@ public class ConsoleEmulator
         }
     }
 
-    private String getAbsolutePath(String location)
+    private File getCanonicalFile(String location) throws IOException
     {
         File file = new File(location);
         if (file.isAbsolute())
         {
-            return location;
+            return file.getCanonicalFile();
         }
         else
         {
-            return new File(currentDirectory.getAbsolutePath() + File.separator + location).getAbsolutePath();
+            return new File(currentDirectory.getAbsolutePath() + File.separator + location)
+                .getCanonicalFile();
         }
     }
 

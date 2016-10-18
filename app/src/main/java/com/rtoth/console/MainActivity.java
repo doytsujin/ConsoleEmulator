@@ -1,21 +1,24 @@
 package com.rtoth.console;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity
 {
-    private final ConsoleEmulator consoleEmulator;
+    private final ConsoleEmulator console;
 
     public MainActivity()
     {
-        consoleEmulator = new ConsoleEmulator();
+        console = new ConsoleEmulator("rtoth", 50);
     }
 
     @Override
@@ -26,19 +29,30 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final TextView textView = (TextView)findViewById(R.id.textView);
+        final ScrollView scrollView = (ScrollView) findViewById(R.id.CONSOLE_SCROLL_VIEW);
 
-        final EditText editText = (EditText) findViewById(R.id.console_input);
-        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        final TextView buffer = (TextView) findViewById(R.id.CONSOLE_BUFFER);
+        buffer.setText(console.getContent());
+
+        final EditText input = (EditText) findViewById(R.id.CONSOLE_INPUT);
+        input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 String command = v.getText().toString();
                 if (!command.trim().isEmpty())
                 {
-                    String output;
-                    output = consoleEmulator.execute(command);
-                    textView.setText(output);
-                    editText.getText().clear();
+                    console.execute(command);
+                    buffer.setText(console.getContent());
+                    input.getText().clear();
+                    scrollView.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            scrollView.fullScroll(View.FOCUS_DOWN);
+                            input.requestFocus();
+                        }
+                    });
                     return true;
                 }
                 return false;

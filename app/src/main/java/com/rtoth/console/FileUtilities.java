@@ -1,5 +1,7 @@
 package com.rtoth.console;
 
+import com.google.common.base.Strings;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -37,5 +39,20 @@ public class FileUtilities
             throw new IOException(
                 String.format("'%s' is not a directory.", directory));
         }
+    }
+
+    public static String getDetails(File file)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(file.canRead() ? "r" : "-");
+        builder.append(file.canWrite() ? "w" : "-");
+        builder.append(file.canExecute() ? "x" : "-");
+        builder.append("\t");
+        builder.append(Strings.padStart(String.valueOf(file.length()), 13, ' '));
+        builder.append("\t");
+        builder.append(file.getName());
+
+        return builder.toString();
     }
 }

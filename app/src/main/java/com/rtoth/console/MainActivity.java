@@ -18,7 +18,17 @@ import android.widget.TextView;
  */
 public class MainActivity extends AppCompatActivity
 {
+    /** FIXME: docs. */
     private final ConsoleEmulator console;
+
+    /** FIXME: docs. */
+    private ScrollView consoleScrollView;
+
+    /** FIXME: docs. */
+    private TextView consoleBuffer;
+
+    /** FIXME: docs. */
+    private EditText consoleInput;
 
     /**
      * Create a new {@link MainActivity}.
@@ -37,14 +47,15 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final ScrollView scrollView = (ScrollView) findViewById(R.id.CONSOLE_SCROLL_VIEW);
+        // Get our view components
+        consoleScrollView = (ScrollView) findViewById(R.id.CONSOLE_SCROLL_VIEW);
+        consoleBuffer = (TextView) findViewById(R.id.CONSOLE_BUFFER);
+        consoleInput = (EditText) findViewById(R.id.CONSOLE_INPUT);
 
-        final TextView buffer = (TextView) findViewById(R.id.CONSOLE_BUFFER);
-        buffer.setText(console.getContent());
-
-        final EditText input = (EditText) findViewById(R.id.CONSOLE_INPUT);
+        // Set the initial buffer contents
+        consoleBuffer.setText(console.getContent());
         // Listen for input from the user
-        input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        consoleInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 String command = v.getText().toString();
@@ -53,18 +64,18 @@ public class MainActivity extends AppCompatActivity
                     // Execute the command
                     console.execute(command);
                     // Update the buffer
-                    buffer.setText(console.getContent());
+                    consoleBuffer.setText(console.getContent());
                     // Clear the input field
-                    input.getText().clear();
+                    consoleInput.getText().clear();
                     // Scroll the buffer to the bottom and focus back on the
                     // input for the user
-                    scrollView.post(new Runnable()
+                    consoleScrollView.post(new Runnable()
                     {
                         @Override
                         public void run()
                         {
-                            scrollView.fullScroll(View.FOCUS_DOWN);
-                            input.requestFocus();
+                            consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                            consoleInput.requestFocus();
                         }
                     });
                     return true;
@@ -72,6 +83,46 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
+    }
+
+    /**
+     * Jump to the top of the console view.
+     *
+     * @param view Current view. Required parameter for callbacks; ignored.
+     */
+    public void jumpToTop(View view)
+    {
+        if (consoleScrollView != null)
+        {
+            consoleScrollView.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    consoleScrollView.fullScroll(View.FOCUS_UP);
+                }
+            });
+        }
+    }
+
+    /**
+     * Jump to the bottom of the console view.
+     *
+     * @param view Current view. Required parameter for callbacks; ignored.
+     */
+    public void jumpToBottom(View view)
+    {
+        if (consoleScrollView != null)
+        {
+            consoleScrollView.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                }
+            });
+        }
     }
 
     @Override

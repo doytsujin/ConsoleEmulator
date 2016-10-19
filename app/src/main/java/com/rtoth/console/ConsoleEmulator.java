@@ -3,8 +3,10 @@ package com.rtoth.console;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.EvictingQueue;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 import android.os.Environment;
@@ -87,34 +89,6 @@ public class ConsoleEmulator
         String result;
         switch (command)
         {
-            case "ls":
-            {
-                if (args.length == 1)
-                {
-                    result = listDirectory(args[0]);
-                }
-                else if (args.length == 0)
-                {
-                    result = listDirectory(currentDirectory.getAbsolutePath());
-                }
-                else
-                {
-                    result = "Usage: ls <directory>";
-                }
-                break;
-            }
-            case "pwd":
-            {
-                if (args.length == 0)
-                {
-                    result = currentDirectory.getAbsolutePath();
-                }
-                else
-                {
-                    result = "Usage: pwd";
-                }
-                break;
-            }
             case "cd":
             {
                 if (args.length == 1)
@@ -127,32 +101,11 @@ public class ConsoleEmulator
                 }
                 break;
             }
-            case "echo":
-            {
-                if (args.length == 1)
-                {
-                    String arg = args[0];
-                    if (arg.length() >= 2 &&
-                        (arg.startsWith("\"") && arg.endsWith("\"") ||
-                        arg.startsWith("\'") && arg.endsWith("\'")))
-                    {
-                        result = arg.substring(1, arg.length() - 1);
-                    }
-                    else
-                    {
-                        result = "Usage: echo \"<string>\"";
-                    }
-                }
-                else
-                {
-                    result = "Usage: echo \"<string>\"";
-                }
-                break;
-            }
             case "clear":
             {
                 if (args.length == 0)
                 {
+                    buffer.clear();
                     result = "";
                 }
                 else
@@ -163,11 +116,12 @@ public class ConsoleEmulator
             }
             default:
             {
-                result = getUnknownCommandMessage(commandStr);
+                result = executeShellCommand(commandStr);
                 break;
             }
         }
-        if (result != null && !result.trim().isEmpty())
+
+        if (!result.trim().isEmpty())
         {
             buffer.add(result);
         }
@@ -206,6 +160,10 @@ public class ConsoleEmulator
         return builder.toString();
     }
 
+    // TODO: Implement signaling to kill processes and such
+
+    // TODO: Handle user input for processes
+
     /**
      * Get the current prompt based on the user and current working directory.
      *
@@ -214,54 +172,6 @@ public class ConsoleEmulator
     private String getPrompt()
     {
         return String.format(PROMPT_FORMAT_STR, user, currentDirectory.getAbsolutePath());
-    }
-
-    /**
-     * Attempt to list the contents of the provided file location.
-     * <p>
-     * If the provided file is a directory, a detailed listing of its children is returned.
-     * If the provided directory is a regular file, only a detailed listing of itself is
-     * returned. Otherwise, if the provided location is invalid for any reason (i.e. does
-     * not exist, unreadable), an appropriate error message is returned.
-     *
-     * @param location Location to list. Cannot be {@code null}.
-     * @return The command output (on success), or error message (on failure) to append
-     *         to the buffer. Never {@code null}.
-     *
-     * @throws NullPointerException if {@code location} is {@code null}.
-     */
-    private String listDirectory(@NonNull String location)
-    {
-        Preconditions.checkNotNull(location, "location cannot be null.");
-
-        StringBuilder builder = new StringBuilder();
-
-        try
-        {
-            File file = getCanonicalFile(location);
-            FileUtilities.assertBasicFilePermissions(file);
-            if (file.isDirectory())
-            {
-                FileUtilities.assertDirectoryPermissions(file);
-                for (File subdirectory : file.listFiles())
-                {
-                    builder.append(FileUtilities.getDetails(subdirectory));
-                    builder.append("\n");
-                }
-            }
-            else
-            {
-                builder.append(FileUtilities.getDetails(file));
-            }
-        }
-        catch (IOException ioe)
-        {
-            builder.append("Error: ");
-            builder.append(ioe.getMessage());
-            builder.append("\n");
-        }
-
-        return builder.toString();
     }
 
     /**
@@ -322,17 +232,54 @@ public class ConsoleEmulator
     }
 
     /**
-     * Get an 'unknown command' message for the provided command.
+     * Execute the provided shell command using the Java Runtime.
      *
-     * @param command Unknown command contents. Cannot be {@code null}.
-     * @return 'Unknown command' message for the provided command. Never {@code null}.
+     * @param shellCommand Command to execute. Cannot be {@code null}.
+     * @return All output (including stdout and stderr) from the execution of
+     *         the command. Never {@code null}.
      *
-     * @throws NullPointerException if {@code command} is {@code null}.
+     * @throws NullPointerException if {@code shellCommand} is {@code null}.
      */
-    private String getUnknownCommandMessage(@NonNull String command)
+    private String executeShellCommand(@NonNull String shellCommand)
     {
-        Preconditions.checkNotNull(command, "command cannot be null.");
+        Preconditions.checkNotNull(shellCommand, "command cannot be null.");
 
-        return String.format("Unrecognized command: '%s'", command);
+        String result;
+        try
+        {
+            Process p = new ProcessBuilder("sh", "-c", shellCommand)
+                .directory(currentDirectory)
+                .redirectErrorStream(true)
+                .start();
+
+            p.waitFor();
+
+            // No need to read stderr since we're redirecting above
+            BufferedReader stdOut = new BufferedReader(
+                new InputStreamReader(p.getInputStream()));
+
+            StringBuilder output = new StringBuilder();
+
+            String line = stdOut.readLine();
+            boolean first = true;
+            while (line != null)
+            {
+                if (!first)
+                {
+                    output.append("\n");
+                }
+                output.append(line);
+                line = stdOut.readLine();
+                first = false;
+            }
+
+            result = output.toString();
+        }
+        catch (IOException | InterruptedException e)
+        {
+            result = "Error: " + e.getMessage();
+        }
+
+        return result;
     }
 }

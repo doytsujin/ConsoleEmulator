@@ -70,39 +70,4 @@ public final class FileUtilities
                 String.format("'%s' is not a directory.", directory));
         }
     }
-
-    /**
-     * Get a string containing the details of the provided file.
-     * <p>
-     * This method will provide:
-     *  - the permissions of the file in a 3-character shorthand: rwx
-     *      read(r), write(w) and execute(x) respectively, with absent permissions
-     *      represented by a '-' (i.e. r-x means write(w) permissions are absent)
-     *  - the file's size in bytes
-     *      padded with spaces to 13 characters, presumably enough to allow all sizes
-     *      to be properly aligned assuming a storage capacity of less than or equal
-     *      to 9,999,999,999,999 bytes (or ~ 10 TB)
-     *  - the filename
-     *      only the base name of the file, not including any parent directories
-     *
-     * @param file File for which to get the details. Cannot be {@code null}.
-     * @return Details of the provided file. Never {@code null}.
-     *
-     * @throws NullPointerException if {@code file} is {@code null}.
-     */
-    public static String getDetails(@NonNull File file)
-    {
-        Preconditions.checkNotNull(file, "file cannot be null.");
-
-        String details =
-            (file.canRead() ? "r" : "-") +
-            (file.canWrite() ? "w" : "-") +
-            (file.canExecute() ? "x" : "-") +
-            "\t" +
-            Strings.padStart(String.valueOf(file.length()), 13, ' ') +
-            "\t" +
-            file.getName();
-
-        return details;
-    }
 }

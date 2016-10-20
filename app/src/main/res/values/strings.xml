@@ -1,4 +1,13 @@
 <resources>
-    <string name="app_name">Console Emulator</string>
+    <string name="app_name_long">Console Emulator</string>
+    <string name="app_name_short">Console</string>
     <string name="action_settings">Settings</string>
+    <string name="prompt">$</string>
+    <string name="action_jump_to_top">Jump to Top</string>
+    <!-- TODO: Get an icon for this instead. -->
+    <string name="action_jump_to_top_condensed">/\\</string>
+    <string name="action_jump_to_bottom">Jump to Bottom</string>
+    <!-- TODO: Get an icon for this instead. -->
+    <string name="action_jump_to_bottom_condensed">\\/</string>
+    <string name="action_set_random_user">Set a random user name</string>
 </resources>

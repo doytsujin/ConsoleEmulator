@@ -1,5 +1,7 @@
 package com.rtoth.console;
 
+import java.util.Random;
+
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +20,9 @@ import android.widget.TextView;
  */
 public class MainActivity extends AppCompatActivity
 {
+    /** Random number generator used for randomized behavior. */
+    private final Random random = new Random();
+
     /** FIXME: docs. */
     private final ConsoleEmulator console;
 
@@ -48,9 +53,9 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         // Get our view components
-        consoleScrollView = (ScrollView) findViewById(R.id.CONSOLE_SCROLL_VIEW);
-        consoleBuffer = (TextView) findViewById(R.id.CONSOLE_BUFFER);
-        consoleInput = (EditText) findViewById(R.id.CONSOLE_INPUT);
+        consoleScrollView = (ScrollView) findViewById(R.id.console_scroll_view);
+        consoleBuffer = (TextView) findViewById(R.id.console_buffer);
+        consoleInput = (EditText) findViewById(R.id.console_input);
 
         // Set the initial buffer contents
         consoleBuffer.setText(console.getContent());
@@ -66,19 +71,10 @@ public class MainActivity extends AppCompatActivity
                     // Update the buffer
                     consoleBuffer.setText(console.getContent());
                     // Clear the input field
-                    consoleInput.getText().clear();
+                    consoleInput.setText("");
                     // Scroll the buffer to the bottom and focus back on the
                     // input for the user
-                    consoleScrollView.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            consoleScrollView.fullScroll(View.FOCUS_DOWN);
-                            consoleInput.requestFocus();
-                        }
-                    });
-                    return true;
+                    jumpToBottom(consoleInput);
                 }
                 return false;
             }
@@ -88,9 +84,10 @@ public class MainActivity extends AppCompatActivity
     /**
      * Jump to the top of the console view.
      *
-     * @param view Current view. Required parameter for callbacks; ignored.
+     * @param view View which should receive focus after scrolling.
+     *             If {@code null}, nothing is focused.
      */
-    public void jumpToTop(View view)
+    public void jumpToTop(final View view)
     {
         if (consoleScrollView != null)
         {
@@ -100,6 +97,10 @@ public class MainActivity extends AppCompatActivity
                 public void run()
                 {
                     consoleScrollView.fullScroll(View.FOCUS_UP);
+                    if (view != null)
+                    {
+                        view.requestFocus();
+                    }
                 }
             });
         }
@@ -108,9 +109,10 @@ public class MainActivity extends AppCompatActivity
     /**
      * Jump to the bottom of the console view.
      *
-     * @param view Current view. Required parameter for callbacks; ignored.
+     * @param view View which should receive focus after scrolling.
+     *             If {@code null}, nothing is focused.
      */
-    public void jumpToBottom(View view)
+    public void jumpToBottom(final View view)
     {
         if (consoleScrollView != null)
         {
@@ -120,6 +122,10 @@ public class MainActivity extends AppCompatActivity
                 public void run()
                 {
                     consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                    if (view != null)
+                    {
+                        view.requestFocus();
+                    }
                 }
             });
         }
@@ -141,10 +147,45 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
+        System.out.println("R: " + R.class);
+        System.out.println("R.id" + R.id.class);
+        switch (id)
         {
-            return true;
+            case R.id.action_settings:
+            {
+                // TODO: Somehow display a settings screen
+                break;
+            }
+            case R.id.action_jump_to_top:
+            {
+                jumpToTop(consoleInput);
+                break;
+            }
+            case R.id.action_jump_to_bottom:
+            {
+                jumpToBottom(consoleInput);
+                break;
+            }
+            case R.id.action_set_random_user:
+            {
+                StringBuilder userBuilder = new StringBuilder();
+                for (int i = 0; i < (5 + random.nextInt(6)); i++)
+                {
+                    int ascii = ((int)'a' + random.nextInt(26));
+                    userBuilder.append((char) ascii);
+                }
+                console.setUser(userBuilder.toString());
+                consoleBuffer.setText(console.getContent());
+                // Scroll the buffer to the bottom and focus back on the
+                // input for the user
+                jumpToBottom(consoleInput);
+                consoleInput.requestFocus();
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
 
         return super.onOptionsItemSelected(item);

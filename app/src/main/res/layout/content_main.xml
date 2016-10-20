@@ -14,8 +14,10 @@
         tools:showIn="@layout/activity_main"
         tools:context="com.rtoth.console.MainActivity">
 
+    <!-- TODO: Fix the layout when it's horizontal. -->
+
     <ScrollView
-            android:id="@+id/CONSOLE_SCROLL_VIEW"
+            android:id="@+id/console_scroll_view"
             android:layout_alignParentTop="true"
             android:layout_width="fill_parent"
             android:layout_height="272dp"
@@ -24,14 +26,14 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:background="#050505"
-            android:scrollbars="vertical">a
+            android:scrollbars="vertical">
 
         <!--
         TODO: Change this to use something other than fontFamily to be
         compatible with android api < 16
          -->
         <TextView
-                android:id="@+id/CONSOLE_BUFFER"
+                android:id="@+id/console_buffer"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="vertical"
@@ -45,10 +47,10 @@
     compatible with android api < 16
      -->
     <TextView
-            android:id="@+id/PROMPT"
+            android:id="@+id/prompt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/CONSOLE_SCROLL_VIEW"
+            android:layout_below="@id/console_scroll_view"
             android:layout_marginTop="2dp"
             android:paddingLeft="5dp"
             android:paddingTop="5dp"
@@ -57,13 +59,13 @@
             android:textColor="#AAAAAA"
             android:fontFamily="monospace"
             android:textSize="15sp"
-            android:text="$"/>
+            android:text="@string/prompt"/>
     <EditText
-            android:id="@+id/CONSOLE_INPUT"
+            android:id="@+id/console_input"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/CONSOLE_SCROLL_VIEW"
-            android:layout_toRightOf="@id/PROMPT"
+            android:layout_below="@id/console_scroll_view"
+            android:layout_toRightOf="@id/prompt"
             android:layout_marginTop="2dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
@@ -76,31 +78,6 @@
             android:inputType="text"
             android:imeOptions="actionSend" />
 
-    <!-- Invisible center strut to help center the buttons -->
-    <View android:id="@+id/CENTER_STRUT"
-          android:layout_width="0dp"
-          android:layout_height="0dp"
-          android:layout_below="@id/CONSOLE_INPUT"
-          android:layout_centerHorizontal="true"/>
-
-    <Button
-            android:id="@+id/JUMP_TO_TOP"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/CONSOLE_INPUT"
-            android:layout_alignRight="@id/CENTER_STRUT"
-            android:layout_alignParentLeft="true"
-            android:text="Jump to Top"
-            android:onClick="jumpToTop"/>
-    <Button
-            android:id="@+id/JUMP_TO_BOTTOM"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/CONSOLE_INPUT"
-            android:layout_alignLeft="@id/CENTER_STRUT"
-            android:layout_alignParentRight="true"
-            android:text="Jump to Bottom"
-            android:onClick="jumpToBottom"/>
-
+    <!-- TODO: Add "nothing to see here..." -->
 
 </RelativeLayout>

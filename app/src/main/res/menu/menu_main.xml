@@ -2,6 +2,26 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.rtoth.console.MainActivity">
+
+    <!-- TODO: Get an icon for this instead of _condensed. -->
+    <item android:id="@+id/action_jump_to_top"
+          android:title="@string/action_jump_to_top"
+          android:titleCondensed="@string/action_jump_to_top_condensed"
+          android:orderInCategory="0"
+          app:showAsAction="ifRoom"/>
+
+    <!-- TODO: Get an icon for this instead of _condensed. -->
+    <item android:id="@+id/action_jump_to_bottom"
+          android:title="@string/action_jump_to_bottom"
+          android:titleCondensed="@string/action_jump_to_bottom_condensed"
+          android:orderInCategory="1"
+          app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/action_set_random_user"
+          android:title="@string/action_set_random_user"
+          android:orderInCategory="2"
+          app:showAsAction="ifRoom"/>
+
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
           android:orderInCategory="100"

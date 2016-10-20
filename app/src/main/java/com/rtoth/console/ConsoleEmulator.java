@@ -26,11 +26,11 @@ public class ConsoleEmulator
      */
     private static final String PROMPT_FORMAT_STR = "%s@android:%s$ ";
 
-    /** Name of the user using this console. */
-    private final String user;
-
     /** Circular buffer of historical commands to display. */
     private final EvictingQueue<String> buffer;
+
+    /** Name of the current user of this console. */
+    private String user;
 
     /** Current working directory. */
     private File currentDirectory;
@@ -60,6 +60,18 @@ public class ConsoleEmulator
         {
             throw new IllegalStateException("Unable to create console.", ioe);
         }
+    }
+
+    /**
+     * Set the current user of this console to the provided value.
+     *
+     * @param user New user. Cannot be {@code null}.
+     *
+     * @throws NullPointerException if {@code user} is {@code null}.
+     */
+    public void setUser(@NonNull String user)
+    {
+        this.user = Preconditions.checkNotNull(user, "user cannot be null.");
     }
 
     /**
@@ -111,6 +123,18 @@ public class ConsoleEmulator
                 else
                 {
                     result = "Usage: clear";
+                }
+                break;
+            }
+            case "whoami":
+            {
+                if (args.length == 0)
+                {
+                    result = user;
+                }
+                else
+                {
+                    result = "Usage: whoami";
                 }
                 break;
             }
